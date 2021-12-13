@@ -1,0 +1,1 @@
+cmd_/home/bitochepe/Documents/p1so1/back/modulos/cpu/Module.symvers := sed 's/ko$$/o/' /home/bitochepe/Documents/p1so1/back/modulos/cpu/modules.order | scripts/mod/modpost -m -a   -o /home/bitochepe/Documents/p1so1/back/modulos/cpu/Module.symvers -e -i Module.symvers   -T -

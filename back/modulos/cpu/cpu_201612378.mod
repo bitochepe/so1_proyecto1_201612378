@@ -1,0 +1,2 @@
+/home/bitochepe/Documents/p1so1/back/modulos/cpu/cpu_201612378.o
+
