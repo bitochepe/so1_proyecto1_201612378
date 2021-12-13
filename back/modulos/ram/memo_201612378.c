@@ -20,9 +20,11 @@ static int escribir_memo(struct seq_file *m, void *v)
     long memoriaCompartida = inf.sharedram*(unsigned long)inf.mem_unit/(1024*1024);
     long memoriaUsada = memoriaTotal - (memoriaLibre + memoriaCompartida);
 
-    seq_printf(m, "memTotal: %lu\n",memoriaTotal);
-    seq_printf(m, "memLibre: %lu\n",memoriaLibre);
-    seq_printf(m, "memCompartida: %lu\n",memoriaCompartida);
+    seq_printf(m, "{\n");
+    seq_printf(m, "\"memTotal\": %lu,\n",memoriaTotal);
+    seq_printf(m, "\"memLibre\": %lu,\n",memoriaLibre);
+    seq_printf(m, "\"memCompartida\": %lu\n",memoriaCompartida);
+    seq_printf(m, "}\n");
     return 0;
 }
 

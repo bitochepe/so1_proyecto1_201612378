@@ -26,7 +26,7 @@ static int escribir_cpu(struct seq_file *m, void *v)
 	int totalpor = 0;
     int totalprocesos = -1;
 
-    seq_printf(m, "[");
+    seq_printf(m, "{\n\"procesos\" : [\n");
 
 	for_each_process(tareas)
 	{
@@ -35,20 +35,21 @@ static int escribir_cpu(struct seq_file *m, void *v)
 		{
 			int cutime = 0;
 			int cstime = 0;
-            seq_printf(m, "%d{\n", tareas->pid);
-            seq_printf(m, "Nombre: %s\n", tareas->comm);
-            seq_printf(m, "Usuario: %d\n", tareas->cred->uid);
-            seq_printf(m, "Estado: %ld\n", tareas->state);
+            seq_printf(m, "{\n");
+            seq_printf(m, "\"Pid\" :%ld,\n", tareas->pid);
+            seq_printf(m, "\"Nombre\": \"%s\",\n", tareas->comm);
+            seq_printf(m, "\"Usuario\": %d,\n", tareas->cred->uid);
+            seq_printf(m, "\"Estado\": %ld,\n", tareas->state);
             if (tareas->mm) {
                 unsigned long rss = get_mm_rss(tareas->active_mm) << PAGE_SHIFT;
                 float prt;
                 prt = (float) (rss/1024)*100/8112888;
-                seq_printf(m, "Memoria: %ld\n", rss);
+                seq_printf(m, "\"Memoria\": %ld,\n", rss);
             } else {
-                seq_printf(m, "Memoria: %ld\n", (long) 0);
+                seq_printf(m, "\"Memoria\": %ld,\n", (long) 0);
             }
 
-            seq_printf(m, "Hijos: [\n");
+            seq_printf(m, "\"Hijos\": [\n");
 			list_for_each(head, &tareas->children)
 			{
 				hijos = list_entry(head, struct task_struct, sibling);
@@ -57,11 +58,14 @@ static int escribir_cpu(struct seq_file *m, void *v)
 					cutime = cutime + hijos->utime;
 					cstime = cstime + hijos->stime;
 				}
-                
-                seq_printf(m, "%d{\n", hijos->pid);
-                seq_printf(m, "Nombre: %s\n", hijos->comm);
+                seq_printf(m, "{\n");
+                seq_printf(m, "\"Pid\" :%ld,\n", hijos->pid);
+                seq_printf(m, "\"Nombre\": \"%s\"\n", hijos->comm);
+                seq_printf(m, "},\n");
                 
 			}
+            seq_printf(m, "{");
+            seq_printf(m, "}\n");
             seq_printf(m, "]\n");
 
 			int total_time = tareas->utime + tareas->stime + cutime + cstime;
@@ -71,11 +75,14 @@ static int escribir_cpu(struct seq_file *m, void *v)
 			{
 				totalpor = totalpor + porcentage;
 			}
-            seq_printf(m, "}\n");
+            seq_printf(m, "},\n");
 		}
 	}
-	seq_printf(m, "Total: %d", totalprocesos);
-    seq_printf(m, "]");
+    seq_printf(m, "{");
+    seq_printf(m, "}\n");
+    seq_printf(m, "],");
+	seq_printf(m, "\"Total\": %d", totalprocesos);
+    seq_printf(m, "}");
 	return 0;
 }
 
