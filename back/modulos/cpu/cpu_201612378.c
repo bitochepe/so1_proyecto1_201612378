@@ -23,65 +23,101 @@ static int escribir_cpu(struct seq_file *m, void *v)
     struct task_struct *tareas;
 	struct task_struct *hijos;
 	struct list_head *head;
-	int totalpor = 0;
+
     int totalprocesos = -1;
+    int totalejecucion = -1;
+    int totalsuspendido = 0;
+    int totaldetenido = -1;
+    int totalzombie = -1;
+    int totalunknow = -1;
 
     seq_printf(m, "{\n\"procesos\" : [\n");
 
 	for_each_process(tareas)
 	{
-        totalprocesos = totalprocesos+1;
-		if (tareas->utime > 0)
-		{
-			int cutime = 0;
-			int cstime = 0;
+        totalprocesos++;
+        seq_printf(m, "{\n");
+        seq_printf(m, "\"Pid\" :%ld,\n", tareas->pid);
+        seq_printf(m, "\"Nombre\": \"%s\",\n", tareas->comm);
+        seq_printf(m, "\"Usuario\": %d,\n", tareas->cred->uid);
+        //seq_printf(m, "\"Estado\": %ld,\n", tareas->state);
+        
+        if(tareas->state == 0)
+        {
+            seq_printf(m, "\"Estado\": \"Running\",\n");
+            totalejecucion = totalejecucion+1;
+        }
+        else if(tareas->state == 1)
+        {
+            seq_printf(m, "\"Estado\": \"Suspended\",\n");
+            totalsuspendido = totalsuspendido+1;
+        }
+        else if(tareas->state == 1026)
+        {
+            seq_printf(m, "\"Estado\": \"Suspended\",\n");
+            totalsuspendido = totalsuspendido+1;
+        }
+        else if(tareas->state == 4)
+        {
+            seq_printf(m, "\"Estado\": \"Zombie\",\n");
+            totalzombie = totalzombie+1;
+        }
+        else if(tareas->state == 8)
+        {
+            seq_printf(m, "\"Estado\": \"Stopped\",\n");
+            totaldetenido = totaldetenido+1;
+        }
+        else if(tareas->exit_state == 16)
+        {
+            seq_printf(m, "\"Estado\": \"Zombie\",\n");
+            totalzombie = totalzombie+1;
+        }
+        else
+        {
+            seq_printf(m, "\"Estado\": \"Unknown\",\n");
+            totalunknow = totalunknow+1;
+        }   
+
+        if (tareas->mm) {
+            unsigned long rss = get_mm_rss(tareas->active_mm) << PAGE_SHIFT;
+            seq_printf(m, "\"Memoria\": %ld,\n", rss);
+        } 
+        else {
+            seq_printf(m, "\"Memoria\": %ld,\n", (long) 0);
+        }
+
+        seq_printf(m, "\"Hijos\": [\n");
+        list_for_each(head, &tareas->children)
+        {
+            hijos = list_entry(head, struct task_struct, sibling);
             seq_printf(m, "{\n");
-            seq_printf(m, "\"Pid\" :%ld,\n", tareas->pid);
-            seq_printf(m, "\"Nombre\": \"%s\",\n", tareas->comm);
-            seq_printf(m, "\"Usuario\": %d,\n", tareas->cred->uid);
-            seq_printf(m, "\"Estado\": %ld,\n", tareas->state);
-            if (tareas->mm) {
-                unsigned long rss = get_mm_rss(tareas->active_mm) << PAGE_SHIFT;
-                float prt;
-                prt = (float) (rss/1024)*100/8112888;
-                seq_printf(m, "\"Memoria\": %ld,\n", rss);
-            } else {
-                seq_printf(m, "\"Memoria\": %ld,\n", (long) 0);
-            }
-
-            seq_printf(m, "\"Hijos\": [\n");
-			list_for_each(head, &tareas->children)
-			{
-				hijos = list_entry(head, struct task_struct, sibling);
-				if (hijos->utime > 0 && hijos->stime>0)
-				{
-					cutime = cutime + hijos->utime;
-					cstime = cstime + hijos->stime;
-				}
-                seq_printf(m, "{\n");
-                seq_printf(m, "\"Pid\" :%ld,\n", hijos->pid);
-                seq_printf(m, "\"Nombre\": \"%s\"\n", hijos->comm);
-                seq_printf(m, "},\n");
-                
-			}
-            seq_printf(m, "{");
-            seq_printf(m, "}\n");
-            seq_printf(m, "]\n");
-
-			int total_time = tareas->utime + tareas->stime + cutime + cstime;
-			int segundos = tareas->utime - (tareas->start_time / 100);
-			int porcentage =  (100*((total_time) / segundos))/100;
-			if (porcentage > 0 && porcentage<60)
-			{
-				totalpor = totalpor + porcentage;
-			}
+            seq_printf(m, "\"Pid\" :%ld,\n", hijos->pid);
+            seq_printf(m, "\"Nombre\": \"%s\"\n", hijos->comm);
             seq_printf(m, "},\n");
-		}
+            
+        }
+        seq_printf(m, "{");
+        seq_printf(m, "}\n");
+        seq_printf(m, "]\n");
+        seq_printf(m, "},\n");
 	}
+
+    if(totalprocesos == -1)totalprocesos = 0;
+    if(totalejecucion == -1)totalejecucion = 0;
+    if(totalsuspendido == -1)totalsuspendido = 0;
+    if(totaldetenido == -1)totaldetenido = 0;
+    if(totalzombie == -1)totalzombie = 0;
+    if(totalunknow == -1)totalunknow = 0;
+
     seq_printf(m, "{");
     seq_printf(m, "}\n");
     seq_printf(m, "],");
-	seq_printf(m, "\"Total\": %d", totalprocesos);
+    seq_printf(m, "\"TotalProcesos\": %d,\n", totalprocesos);
+    seq_printf(m, "\"TotalEjecucion\": %d,\n", totalejecucion);
+    seq_printf(m, "\"TotalSuspendido\": %d,\n", totalsuspendido);
+    seq_printf(m, "\"TotalDetenido\": %d,\n", totaldetenido);
+    seq_printf(m, "\"TotalUnknow\": %d,\n", totalunknow);
+    seq_printf(m, "\"TotalZombie\": %d\n", totalzombie);
     seq_printf(m, "}");
 	return 0;
 }
