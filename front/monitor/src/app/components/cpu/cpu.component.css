@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,400');
 .card {
+margin-left: 15%;
+margin-top: 5%;
  width: 70%;
  display: block;
  background-color: #333941;

@@ -4,26 +4,25 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math/rand"
 	"net/http"
 	"os/exec"
-	"strconv"
 
 	"github.com/gorilla/mux"
 )
 
 type response struct {
-	Data   string `json:"Data"`
-	Status bool   `json:"Status"`
+	Data    string `json:"Data"`
+	Status  bool   `json:"Status"`
+	MemHome string `json:"MemHome"`
 }
 
 func homeRute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:4200")
 	w.Header().Set("Content-Type", "application/json")
-
 	var response response
 	response.Status = true
 
+	//obtengo los proesos
 	cmd := "cat /proc/cpu_201612378"
 	out, err := exec.Command("bash", "-c", cmd).Output()
 	if err != nil {
@@ -33,14 +32,27 @@ func homeRute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response.Data = string(out)
+
+	//obtener datos de la memoria
+	cmd = "cat /proc/memo_201612378"
+	out, err = exec.Command("bash", "-c", cmd).Output()
+	if err != nil {
+		fmt.Print("Failed to execute command: ", cmd)
+		response.Status = false
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	response.MemHome = string(out)
 	json.NewEncoder(w).Encode(response)
 }
+
 func getCpu(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:4200")
 	w.Header().Set("Content-Type", "application/json")
 	var response response
 	response.Status = true
-	cmd := "ps -eo pcpu | sort -k 1 -r | head -50"
+	//cmd := "ps -eo pcpu | sort -k 1 -r | head -50"
+	cmd := "top -b -n1 | tail -n+7 | head -n50 | awk '{print $9}'"
 	out, err := exec.Command("bash", "-c", cmd).Output()
 	if err != nil {
 		fmt.Print("Failed to execute command: ", cmd)
@@ -48,8 +60,9 @@ func getCpu(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	print("Endpoint: CPU")
 	response.Data = string(out)
-	response.Data = strconv.Itoa(rand.Intn(100))
+	//response.Data = strconv.Itoa(rand.Intn(100))
 	json.NewEncoder(w).Encode(response)
 }
 func getMemo(w http.ResponseWriter, r *http.Request) {
@@ -57,6 +70,7 @@ func getMemo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var response response
 	response.Status = true
+
 	cmd := "cat /proc/memo_201612378"
 	out, err := exec.Command("bash", "-c", cmd).Output()
 	if err != nil {
@@ -74,7 +88,7 @@ func getMemo(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	response.Data = datosmem + ";" + string(out)
+	response.Data = datosmem + "\n\"memCache\": " + string(out) + "}"
 	json.NewEncoder(w).Encode(response)
 }
 func main() {
@@ -82,6 +96,6 @@ func main() {
 	router.HandleFunc("/home", homeRute).Methods("GET")
 	router.HandleFunc("/cpu", getCpu).Methods("GET")
 	router.HandleFunc("/memo", getMemo).Methods("GET")
-	log.Fatal(http.ListenAndServe(":3000", router))
 	fmt.Println("Server running on port 3000")
+	log.Fatal(http.ListenAndServe(":3000", router))
 }

@@ -27,7 +27,7 @@ static int escribir_cpu(struct seq_file *m, void *v)
     int totalprocesos = -1;
     int totalejecucion = -1;
     int totalsuspendido = 0;
-    int totaldetenido = -1;
+    int totaldetenido = 0;
     int totalzombie = -1;
     int totalunknow = -1;
 
@@ -67,14 +67,19 @@ static int escribir_cpu(struct seq_file *m, void *v)
             seq_printf(m, "\"Estado\": \"Stopped\",\n");
             totaldetenido = totaldetenido+1;
         }
+        else if(tareas->state ==260){
+            seq_printf(m, "\"Estado\": \"Stopped\",\n");
+            totaldetenido = totaldetenido+1;
+        }
         else if(tareas->exit_state == 16)
         {
             seq_printf(m, "\"Estado\": \"Zombie\",\n");
             totalzombie = totalzombie+1;
         }
+        
         else
         {
-            seq_printf(m, "\"Estado\": \"Unknown\",\n");
+            seq_printf(m, "\"Estado\": %ld,\n",tareas->state);
             totalunknow = totalunknow+1;
         }   
 
