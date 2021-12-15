@@ -40,6 +40,7 @@ export class HomeComponent implements OnInit {s
         this.totalZobie = data.TotalZombie;
 
         this.procesos = data.procesos;
+        console.log(this.procesos)
         this.procesos.pop();
       }
       else {

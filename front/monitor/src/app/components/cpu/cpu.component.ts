@@ -78,9 +78,11 @@ export class CpuComponent implements OnInit, OnDestroy {
 		this.monitorService.getCpu().subscribe(response => {  
 			if(response.Status == true) {
         //sacar valores de cpu
+        /*
         this.datos = response.Data.split("\n");
         this.datos.shift()
         this.porcentaje = 0
+        
         this.datos.forEach(element => {
           if(element.length >1){
             this.porcentaje = this.porcentaje + parseFloat(element)
@@ -88,6 +90,8 @@ export class CpuComponent implements OnInit, OnDestroy {
         });
         this.porcentaje = Math.round(this.porcentaje * 100) / 100
         if(this.porcentaje > 100) {this.porcentaje = 100}
+        */
+        this.porcentaje = 100 -response.Data
 
         //valores de abajo
 				let chartTime: any = new Date();

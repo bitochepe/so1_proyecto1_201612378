@@ -71,6 +71,11 @@ static int escribir_cpu(struct seq_file *m, void *v)
             seq_printf(m, "\"Estado\": \"Stopped\",\n");
             totaldetenido = totaldetenido+1;
         }
+        else if(tareas->state == 128)
+        {
+            seq_printf(m, "\"Estado\": \"Zombie\",\n");
+            totalzombie = totalzombie+1;
+        }
         else if(tareas->exit_state == 16)
         {
             seq_printf(m, "\"Estado\": \"Zombie\",\n");

@@ -52,7 +52,8 @@ func getCpu(w http.ResponseWriter, r *http.Request) {
 	var response response
 	response.Status = true
 	//cmd := "ps -eo pcpu | sort -k 1 -r | head -50"
-	cmd := "top -b -n1 | tail -n+7 | head -n50 | awk '{print $9}'"
+	//cmd := "top -b -n1 | tail -n+7 | head -n50 | awk '{print $9}'"
+	cmd := "top -bn 1 -i -c | head -n 3 | tail -1 | awk {'print $8'}"
 	out, err := exec.Command("bash", "-c", cmd).Output()
 	if err != nil {
 		fmt.Print("Failed to execute command: ", cmd)
