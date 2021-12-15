@@ -111,13 +111,30 @@ func killTask(w http.ResponseWriter, r *http.Request) {
 	response.Data = string(out)
 	json.NewEncoder(w).Encode(response)
 }
+func getUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:4200")
+	w.Header().Set("Content-Type", "application/json")
+	var response response
+	response.Status = true
 
+	cmd := "less /etc/passwd | awk '{print $1}'"
+	out, err := exec.Command("bash", "-c", cmd).Output()
+	if err != nil {
+		fmt.Print("Failed to execute command: ", cmd)
+		response.Status = false
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	response.Data = string(out)
+	json.NewEncoder(w).Encode(response)
+}
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/home", homeRute).Methods("GET")
 	router.HandleFunc("/cpu", getCpu).Methods("GET")
 	router.HandleFunc("/memo", getMemo).Methods("GET")
 	router.HandleFunc("/kill/{pid}", killTask).Methods("GET")
+	router.HandleFunc("/getUser", getUser).Methods("GET")
 	fmt.Println("Server running on port 3000")
 	log.Fatal(http.ListenAndServe(":3000", router))
 }

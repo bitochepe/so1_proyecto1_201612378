@@ -21,4 +21,8 @@ export class MonitorServiceService {
   killTask(pid:string){
     return <any>this.http.get(`${this.URL}kill/${pid}`);
   }
+
+  getUser(){
+    return <any>this.http.get(`${this.URL}getUser`);
+  }
 }
