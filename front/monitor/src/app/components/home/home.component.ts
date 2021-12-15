@@ -14,6 +14,7 @@ export class HomeComponent implements OnInit {s
   public totalCorriendo;
   public totalSuspendido;
   public totalZobie;
+  public procesos: any = [];
 
   constructor(private monitorService:MonitorServiceService) { }
 
@@ -21,7 +22,7 @@ export class HomeComponent implements OnInit {s
     this.getDatos();
     this.intervalUpdate = setInterval(() => {
       this.getDatos();
-    }, 3000); 
+    }, 10000); 
   }
 
   getDatos(){
@@ -37,6 +38,9 @@ export class HomeComponent implements OnInit {s
         this.totalCorriendo = data.TotalEjecucion;
         this.totalSuspendido = data.TotalSuspendido;
         this.totalZobie = data.TotalZombie;
+
+        this.procesos = data.procesos;
+        this.procesos.pop();
       }
       else {
 				console.error("ERROR: The response had an error, retrying");
@@ -44,6 +48,19 @@ export class HomeComponent implements OnInit {s
 		}, error => {
 			console.error("ERROR: Unexpected response", error);
 		});
+  }
+
+  killTask(pid:string){
+    this.monitorService.killTask(pid).subscribe(response =>{
+      if(response.Status == true){
+        alert('Eliminado');
+      }
+      else{
+        console.error("ERROR: The server cant kill the process")
+      }
+    }, error =>{
+      console.error("ERROR: Unexpected response", error);
+    });
   }
 
 }

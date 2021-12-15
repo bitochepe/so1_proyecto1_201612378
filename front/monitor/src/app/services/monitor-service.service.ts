@@ -18,4 +18,7 @@ export class MonitorServiceService {
   getMemo(){
     return <any>this.http.get(`${this.URL}memo`);
   }
+  killTask(pid:string){
+    return <any>this.http.get(`${this.URL}kill/${pid}`);
+  }
 }

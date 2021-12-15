@@ -8,21 +8,49 @@
             <h4>Total Suspendido : {{totalSuspendido}}</h4>
             <h4>Total Detenido : {{totalDetenido}}</h4>
             <h4>Total Zombie : {{totalZobie}}</h4>
+            <button type="button" class="btn btn-success" (click)="getDatos()">Refresh</button>
         </div>
     </div>
 </div>
-<accordion>
-    <accordion-group heading="Static Header">
-      This content is straight in the template.
-    </accordion-group>
-    <accordion-group heading="Another group">
-      <p>Some content</p>
-    </accordion-group>
-    <accordion-group heading="Another group">
-      <p>Some content</p>
-    </accordion-group>
-    <accordion-group heading="Another group">
-      <p>Some content</p>
-    </accordion-group>
-  </accordion>
-
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">PID</th>
+      <th scope="col">Nombre</th>
+      <th scope="col">Usuario</th>
+      <th scope="col">Estado</th>
+      <th scope="col">CPU%</th>
+      
+    </tr>
+  </thead>
+  <tbody *ngFor="let pr of procesos">
+    <tr class="table-dark"> 
+      <td scope="row">{{pr.Pid}}</td>
+      <td>{{pr.Nombre}}</td>
+      <td>{{pr.Usuario}}</td>
+      <td>{{pr.Estado}}</td>
+      <td>{{pr.Memoria}}</td>
+      <td><button type="button" class="btn btn-danger" (click)="killTask(pr.Pid)">Kill</button></td>
+    </tr>
+    <tr>
+      <td colspan ="6">
+        <accordion>
+          <accordion-group heading="">
+            <table class="table table-hover">
+              <tbody>
+                <tr>
+                  <th>PID</th>
+                  <th>Nombre</th>
+                </tr>
+                <tr class="table-dark" *ngFor="let ch of pr.Hijos">
+                  <td scope="row">{{ch.Pid}}</td>
+                  <td>{{ch.Nombre}}</td>  
+                </tr>
+              </tbody>
+            </table>
+          </accordion-group>
+        </accordion>
+      </td>
+    </tr>
+  </tbody>
+</table>

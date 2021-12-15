@@ -35,10 +35,11 @@ export class MemoComponent implements OnInit, OnDestroy {
 
   private intervalUpdate: any = null;
   public chart: any = null;
-  private datos: any
   public porcentaje = 0
   public memoriaTotal = 0
   public memoriaUsada = 0
+  public porcentajeS = 0
+  public memoriaUsadaS = 0
 
   constructor(private monitorService:MonitorServiceService) { }
 
@@ -79,11 +80,14 @@ export class MemoComponent implements OnInit, OnDestroy {
 			if(response.Status == true) {
         //sacar valores de memo
         let datos = JSON.parse(response.Data);
-        console.log(datos);
-        this.memoriaTotal = datos.memTotal;
+        console.log(datos)
+        this.memoriaTotal = datos.memTotal -200;
         this.memoriaUsada = datos.memTotal -datos.memLibre + datos.memCompartida + datos.memBuffer;
+        this.memoriaUsadaS = datos.memTotal -datos.memLibre -datos.memCache + datos.memCompartida + datos.memBuffer;
         this.porcentaje = this.memoriaUsada*100/this.memoriaTotal;
         this.porcentaje = Math.round(this.porcentaje * 100) / 100
+        this.porcentajeS = this.memoriaUsadaS*100/this.memoriaTotal;
+        this.porcentajeS = Math.round(this.porcentajeS * 100) / 100
 
         //valores de abajo
 				let chartTime: any = new Date();

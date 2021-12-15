@@ -1,8 +1,21 @@
 <div class="card">
     <canvas id="realtime">{{ chart }}</canvas>
     <div class="card-content">
-     <p>Memoria Total : {{memoriaTotal}} MB</p>
-     <p>Memoria Usada : {{memoriaUsada}} MB</p>
-     <p>Porcentaje : {{porcentaje}}%</p>
+     <table class="table ">
+        <tbody>
+          <tr>
+            <td scope="row">Memoria Total : {{memoriaTotal}} MB </td>
+            <td>Memoria Total : {{memoriaTotal}} MB </td>
+          </tr>
+          <tr>
+            <td scope="row">Memoria Usada : {{memoriaUsada}} MB</td>
+            <td>Memoria Usada : {{memoriaUsadaS}} MB</td>
+          </tr>
+          <tr>
+            <td scope="row">Porcentaje : {{porcentaje}}%</td    >
+            <td>Porcentaje : {{porcentajeS}}%</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 </div>

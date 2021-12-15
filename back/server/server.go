@@ -60,9 +60,7 @@ func getCpu(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	print("Endpoint: CPU")
 	response.Data = string(out)
-	//response.Data = strconv.Itoa(rand.Intn(100))
 	json.NewEncoder(w).Encode(response)
 }
 func getMemo(w http.ResponseWriter, r *http.Request) {
@@ -91,11 +89,34 @@ func getMemo(w http.ResponseWriter, r *http.Request) {
 	response.Data = datosmem + "\n\"memCache\": " + string(out) + "}"
 	json.NewEncoder(w).Encode(response)
 }
+
+func killTask(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:4200")
+	w.Header().Set("Content-Type", "application/json")
+	var response response
+	response.Status = true
+
+	vars := mux.Vars(r)
+	taskID := vars["pid"]
+
+	//matar proceso
+	out, err := exec.Command("kill", "-9", taskID).Output()
+	if err != nil {
+		fmt.Print("Failed to execute command: kill ")
+		response.Status = false
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	response.Data = string(out)
+	json.NewEncoder(w).Encode(response)
+}
+
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/home", homeRute).Methods("GET")
 	router.HandleFunc("/cpu", getCpu).Methods("GET")
 	router.HandleFunc("/memo", getMemo).Methods("GET")
+	router.HandleFunc("/kill/{pid}", killTask).Methods("GET")
 	fmt.Println("Server running on port 3000")
 	log.Fatal(http.ListenAndServe(":3000", router))
 }
